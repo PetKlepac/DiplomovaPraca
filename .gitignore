@@ -1,0 +1,15 @@
+# Ignore everything by default
+*
+
+# Allow only Python files
+!**/*.py
+
+# Allow important files and folders
+!.gitignore
+!README.md
+!*.md
+!requirements.txt
+!LICENSE
+
+# Allow folder structure
+!*/
