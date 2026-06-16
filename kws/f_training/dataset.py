@@ -24,7 +24,7 @@ class RawWaveformDataset(Dataset):
         self.target_samples = target_samples                # uloženie cieľovej dĺžky
         self.augment_training = augment_training            # nastavenie augmentácií
         self.samples = self._build_samples()                # zoznam všetkých súborov
-        print(f"✅ Loaded {len(self.samples)} samples from {self.base_dir} "
+        print(f"Loaded {len(self.samples)} samples from {self.base_dir} "
               f"(augment={augment_training})")
 
     def _build_samples(self):
@@ -74,11 +74,11 @@ class RawWaveformDataset(Dataset):
                     waveform = waveform + noise
 
             if len(waveform) != self.target_samples:
-                print(f" ⚠️ Dĺžka {len(waveform)} samples | {wav_path.name}, "
+                print(f"Dĺžka {len(waveform)} samples | {wav_path.name}, "
                       f"očakávané: {self.target_samples} samples")
 
             return waveform, torch.tensor(label, dtype=torch.long)
 
         except Exception as e:
-            print(f"⚠️ Chyba pri načítaní {wav_path.name}: {e}")
+            print(f"Chyba pri načítaní {wav_path.name}: {e}")
             return None, None

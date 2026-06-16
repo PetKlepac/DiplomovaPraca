@@ -1,7 +1,6 @@
 """Hlavný skript na spustenie tréningu Keyword Spotting modelu."""
 
 import os
-import sys
 import warnings
 from pathlib import Path
 import shutil
@@ -9,43 +8,28 @@ import importlib.util
 import multiprocessing as mp
 import torch
 from torch.utils.data import DataLoader
+from kws.f_training.dataset import RawWaveformDataset
+from kws.f_training.trainer import train_model
+from transformers import logging as hf_logging
 
-# ====================== WINDOWS + HF SETUP ======================
-def setup_environment():
-    """Všetko nastavenie prostredia na jednom mieste"""
-    # Windows UTF-8
-    if sys.platform == "win32":
-        try:
-            sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', errors='replace', buffering=1)
-            sys.stderr = open(sys.stderr.fileno(), mode='w', encoding='utf-8', errors='replace', buffering=1)
-        except:
-            pass
 
-    # Suppress HuggingFace warnings
+def main() -> None:
+    # ────────────────────────────────────────────────────────────────
+    # POTLAČENIE SPRÁV
+    # ────────────────────────────────────────────────────────────────
     os.environ["HF_HUB_VERBOSITY"] = "error"
     os.environ["TRANSFORMERS_VERBOSITY"] = "error"
     os.environ["TRANSFORMERS_NO_ADVISORY_WARNINGS"] = "1"
     warnings.filterwarnings("ignore", module="huggingface_hub")
     warnings.filterwarnings("ignore", module="transformers")
-
-    from transformers import logging as hf_logging
     hf_logging.set_verbosity_error()
-
-
-# ====================== IMPORTY PROJEKTU ======================
-# Imported lazily inside main() to keep Windows spawn workers import-safe.
-
-def main() -> None:
-    setup_environment()
-
-    from kws.f_training.dataset import RawWaveformDataset
-    from kws.f_training.trainer import train_model
 
     # ────────────────────────────────────────────────────────────────
     # NAČÍTANIE CONFIGU
     # ────────────────────────────────────────────────────────────────
     CONFIG_NAME = "c"
-    CONFIG_PATH = Path(r"C:\Users\peter\Moje\Diplomka\DiplomovaPraca\kws\d_config") / f"{CONFIG_NAME}.py"
+    project_root = Path(__file__).resolve().parents[2]
+    CONFIG_PATH = project_root / "kws" / "d_config" / f"{CONFIG_NAME}.py"
 
     spec = importlib.util.spec_from_file_location(CONFIG_NAME, CONFIG_PATH)
     config = importlib.util.module_from_spec(spec)
@@ -64,7 +48,7 @@ def main() -> None:
     shutil.copy(CONFIG_PATH, experiment_dir / f"{config.CONFIG_SLUG}.py")  # záloha configu
 
     # ────────────────────────────────────────────────────────────────
-    # DATASET + DATALOADERS
+    # DATASET A DATALOADERS
     # ────────────────────────────────────────────────────────────────
     print("Načítavam dataset...")
 
@@ -104,38 +88,39 @@ def main() -> None:
     # ────────────────────────────────────────────────────────────────
     # VÁHY PRE CrossEntropyLoss
     # ────────────────────────────────────────────────────────────────
-    print("\n Počítam class weights...")
+    print("\n Počítam váhy...")
 
-    # dočasný dataset BEZ augmentácií pre spočítanie
-    temp_dataset = RawWaveformDataset(
+    temp_dataset = RawWaveformDataset(  # dočasný dataset BEZ augmentácií pre spočítanie
         subdir="train",
         root_dir=config.DATA_ROOT,
         target_samples=config.TARGET_SAMPLES,
-        augment_training=False,                     # <<< dôležité!
+        augment_training=False, # dôležité!
     )
 
     pos_count = sum(1 for _, label in temp_dataset if label == 1)
     total_count = len(temp_dataset)
     neg_count = total_count - pos_count
-
-    print(f"Train dataset: {total_count:,} vzoriek")
-    print(f"Pozitívne: {pos_count:,} | Negatívne: {neg_count:,}")
-
     w_pos = neg_count / pos_count if pos_count > 0 else 1.0
-    class_weights = torch.tensor([1.0, w_pos])      # váhy pre vyváženie tried
+    class_weights = torch.tensor([1.0, w_pos])
 
+    print(f"Trénovací dataset: {total_count:,} vzoriek")
+    print(f"Pozitívne: {pos_count:,} | Negatívne: {neg_count:,}")
     print(f"Váhy → neg: 1.0000 | pos: {w_pos:.4f}\n")
 
     # ────────────────────────────────────────────────────────────────
-    # MODEL
+    # MODEL A FREEZING
     # ────────────────────────────────────────────────────────────────
     print("Načítavam model...")
 
     model = config.MODEL_CLASSES[config.MODEL_SLUG](
         num_classes=2,
-        freeze_feature_extractor=True,              # zamrazenie CNN častí
-        freeze_encoder=True,                        # zamrazenie Transformer encoderu
+        freeze_feature_extractor=True,
+        freeze_encoder=True,
+        unfreeze_last_n_layers=3,
+        verbose=True
     )
+
+    print("Model bol úspešne načítaný.")
 
     # ────────────────────────────────────────────────────────────────
     # TRÉNING
@@ -164,5 +149,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    mp.set_start_method('spawn', force=True)        # bezpečné pre Windows multiprocessing
+    mp.set_start_method('spawn', force=True)   # bezpečné pre Windows multiprocessing
     main()

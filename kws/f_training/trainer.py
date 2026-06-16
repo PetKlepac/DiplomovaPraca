@@ -32,6 +32,7 @@ def train_model(
     experiment_dir=None,      # priečinok na uloženie výsledkov
     model_name="experiment",  # názov experimentu
     class_weights=None        # očakávame tensor [w_neg, w_pos]
+
 ):
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -42,24 +43,25 @@ def train_model(
     # ────────────────────────────────────────────────────────────────
     if class_weights is not None:
         criterion = nn.CrossEntropyLoss(weight=class_weights.to(device))  # vážená strata podľa tried
-        print(f"✓ Používam CrossEntropyLoss s váhami | neg={class_weights[0]:.4f}, pos={class_weights[1]:.4f}")
+        print(f"CrossEntropyLoss s váhami | neg={class_weights[0]:.4f}, pos={class_weights[1]:.4f}")
     else:
         criterion = nn.CrossEntropyLoss()
-        print("✓ Používam CrossEntropyLoss (bez váhovania)")
+        print("CrossEntropyLoss bez váh")
 
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)  # Adam s L2 regularizáciou
 
     # ────────────────────────────────────────────────────────────────
     # SCHEDULER
     # ────────────────────────────────────────────────────────────────
-    scheduler = ReduceLROnPlateau(
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,
-        mode='min',           # znižuje LR pri poklese valid loss
+        mode='min',
         factor=0.5,
-        patience=3,
-        min_lr=1e-6
+        patience=2,
+        cooldown=1,
+        min_lr=1e-7,
     )
-    print("✓ Scheduler: ReduceLROnPlateau")
+    print("Scheduler: ReduceLROnPlateau")
 
     history = {
         "train_loss": [],
@@ -67,6 +69,7 @@ def train_model(
         "val_loss": [],
         "val_acc": []
     }
+
     best_val_acc = -1.0
     best_epoch = 0
 
@@ -79,23 +82,25 @@ def train_model(
         # ────────────────────────────────────────────────────────────────
         # TRAIN
         # ────────────────────────────────────────────────────────────────
-        model.train()  # prepnutie modelu do tréningového režimu (zapne dropout, batchnorm atď.)
-        train_loss = 0.0  # akumulátor straty pre celú epochu
+        model.train()      # prepnutie modelu do tréningového režimu (zapne dropout, batchnorm atď.)
+        train_loss = 0.0   # akumulátor straty pre celú epochu
         train_correct = 0  # počet správne klasifikovaných vzoriek
-        train_total = 0  # celkový počet spracovaných vzoriek (na výpočet priemerov)
+        train_total = 0    # celkový počet spracovaných vzoriek (na výpočet priemerov)
 
         train_bar = tqdm(train_loader, desc=f"Epoch {epoch}/{epochs} [Train]")  # progress bar pre tréning
         for inputs, targets in train_bar:
             inputs, targets = inputs.to(device), targets.to(device)  # presun dát na zariadenie
 
-            optimizer.zero_grad()  # vynulovanie gradientov pred novým krokom
-            outputs = model(inputs)  # forward pass
+            optimizer.zero_grad()                 # vynulovanie gradientov pred novým krokom
+            outputs = model(inputs)               # forward pass
             loss = criterion(outputs, targets)
+            loss.backward()                       # spätná propagácia (výpočet gradientov)
 
-            loss.backward()  # spätná propagácia (výpočet gradientov)
-            optimizer.step()  # aktualizácia váh modelu
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
 
-            batch_size = inputs.size(0)  # aktuálna veľkosť batchu
+            optimizer.step()                      # aktualizácia váh modelu
+
+            batch_size = inputs.size(0)           # aktuálna veľkosť batchu
 
             train_loss += loss.item() * batch_size  # akumulácia váženého loss
             train_correct += outputs.argmax(dim=1).eq(targets).sum().item()  # počet správne klasifikovaných vzoriek
