@@ -18,11 +18,11 @@ import winsound
 
 # ==================== KONFIGURÁCIA ====================
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-input_file = PROJECT_ROOT / "kws" / "a_data_preparation" / "raw_data" / "short_records" / "nedele.wav"
-output_folder = PROJECT_ROOT / "kws" / "a_data_preparation" / "prepared_data" / "training" / "negative" / "airport_negative_nedele_500"
+input_file = PROJECT_ROOT / "kws" / "a_data_preparation" / "raw_data" / "short_records" / "ctvrtekpatek.wav"
+output_folder = PROJECT_ROOT / "kws" / "a_data_preparation" / "prepared_data" / "training" / "negative" / "airport_negative_ctvrtekpatek_500"
 
-BASE_NAME = "nedele_seg"
-NUM_SEGMENTS_TO_GENERATE = 530
+BASE_NAME = "ctvrtekpatek_seg"
+NUM_SEGMENTS_TO_GENERATE = 540
 SEGMENT_LENGTH_SEC = 1.0
 TARGET_SR = 16000
 RANDOM_SEED = 42

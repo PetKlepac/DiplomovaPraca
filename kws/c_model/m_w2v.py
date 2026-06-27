@@ -13,7 +13,7 @@ class Wav2VecKWS(nn.Module):
             num_classes: int = 2,
             freeze_feature_extractor: bool = True,
             freeze_encoder: bool = True,
-            unfreeze_last_n_layers: int = 3,  # ← dôležitý parameter
+            unfreeze_last_n_layers: int = 3,
             verbose: bool = True,
     ):
         super().__init__()
