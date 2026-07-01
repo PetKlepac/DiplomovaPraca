@@ -1,5 +1,5 @@
 """
-Interaktívna anotácia audio súborov klávesnicou.
+Interaktívna anotácia dlhých audio segmentov klávesnicou.
 
 Vstup:
     Priečinok s pripravenými 1-sekundovými segmentmi

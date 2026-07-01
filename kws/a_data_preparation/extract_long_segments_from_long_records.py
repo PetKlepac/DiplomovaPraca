@@ -1,8 +1,8 @@
 """
-Skript na segmentáciu dlhšieho audio súboru na rečové segmenty.
+Skript na segmentáciu dlhšej nahrávky na dlhé rečové segmenty.
 
 Účel:
-    Rozdelí jeden dlhší audio súbor (nahrávku celého dňa bez filtrovania hlasných časťí) na samostatné
+    Rozdelí jednu dlhšiu nahrávku (audio súbor celého dňa BEZ FILTROVANIA hlasných časťí) na samostatné
     rečové segmenty (vety) s bufferom na konci. Následne je ešte potrebné anotovať s annotate_long_segments.
 """
 

@@ -1,4 +1,4 @@
-"""Wav2VecKWS - Optimalizovaná implementácia wav2vec2 pre Keyword Spotting (KWS)."""
+"""Wav2VecKWS - implementácia wav2vec2 pre Keyword Spotting (KWS)."""
 
 import torch
 import torch.nn as nn

@@ -1,10 +1,10 @@
 """
-Skript na extrakciu rovnomerne rozložených segmentov z JEDNÉHO konkrétneho audio súboru.
+Skript na extrakciu rovnomerne rozložených segmentov z jednej krátkej nahrávky.
 
 Účel:
-    Z dlhšieho audio súboru vygeneruje rovnomerne rozložené 1-sekundové segmenty
-    s malou náhodnou odchýlkou. Následne umožňuje interaktívne schvaľovanie
-    (počúvanie + rozhodnutie uložiť/zahodiť).
+    Z krátkej nahrávky (audio súbor celého dňa S POUŽITÍM FILTROVANIA hlasných častí) vygeneruje
+    rovnomerne rozložené 1-sekundové segmenty s malou náhodnou odchýlkou. Následne umožňuje
+    interaktívne schvaľovanie (počúvanie + rozhodnutie uložiť/zahodiť).
 """
 
 import os
