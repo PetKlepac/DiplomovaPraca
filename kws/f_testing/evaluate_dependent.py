@@ -38,7 +38,12 @@ THRESHOLDS = [0.95, 0.80, 0.50]
 # ────────────────────────────────────────────────────────────────
 project_root = Path(__file__).resolve().parents[2]
 output_base = project_root / "kws" / "g_result" / MODEL_NAME / "testing"
-file_suffix = f"{MODEL_NAME}_e{EPOCH_TO_USE:02d}"
+
+if MODEL_NAME == "whisper":
+    file_suffix = f"{MODEL_NAME}"
+else:
+    file_suffix = f"{MODEL_NAME}_e{EPOCH_TO_USE:02d}"
+
 output_dir = output_base / file_suffix
 csv_path = output_dir / f"table_{file_suffix}.csv"
 

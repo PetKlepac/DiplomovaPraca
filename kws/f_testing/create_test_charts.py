@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 # ────────────────────────────────────────────────────────────────
 # KONFIGURÁCIA
 # ────────────────────────────────────────────────────────────────
-MODEL_NAME = "d2_m_w2v_c"
+MODEL_NAME = "whisper"
 EPOCH_TO_USE = 10
 THRESHOLD = 0.50
 
@@ -37,7 +37,11 @@ THRESHOLD = 0.50
 # ────────────────────────────────────────────────────────────────
 project_root = Path(__file__).resolve().parents[2]
 output_base = project_root / "kws" / "g_result" / MODEL_NAME / "testing"
-file_suffix = f"{MODEL_NAME}_e{EPOCH_TO_USE:02d}"
+
+if MODEL_NAME == "whisper":
+    file_suffix = f"{MODEL_NAME}"
+else:
+    file_suffix = f"{MODEL_NAME}_e{EPOCH_TO_USE:02d}"
 
 # Vytvoríme / použijeme rovnaký priečinok ako test.py
 output_dir = output_base / file_suffix

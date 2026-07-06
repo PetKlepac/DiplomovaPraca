@@ -43,7 +43,7 @@ EPOCH_TO_USE = 10
 # CESTY
 # ────────────────────────────────────────────────────────────────
 project_root = Path(__file__).resolve().parents[2]
-root_folder = project_root / "kws" / "a_data_preparation" / "prepared_data" / "testing"
+root_folder = project_root / "kws" / "b_dataset" / "testing"
 model_dir = project_root / "kws" / "g_result" / MODEL_NAME / "models"
 model_path = model_dir / f"{MODEL_NAME}_e{EPOCH_TO_USE:02d}.pth"
 
