@@ -226,7 +226,7 @@ Táto štruktúra umožňuje prehľadné ukladanie a porovnávanie viacerých ex
 
 ---
 
-# Zhrnutie pipeline
+# Zhrnutie toku práce
 
 1. Na prípravu dát slúžia skripty `prepare_noises.py`, `extract_long_segments_from_long_records.py`, `annotate_long_segments.py` a `extract_short_negative_segments_from_short_records.py`. Pre použitie audio dát práce postačí skript `download_data.py`.
 2. Po ich použití sa spustí `b_dataset/create_dataset.py`. Pre použitie datasetov práce postačí použiť skript `download_datasets.py`.
