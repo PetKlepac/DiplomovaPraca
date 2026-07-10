@@ -60,14 +60,12 @@ Odporúča sa preto práca s IDE, kde niektoré predošlé kroky prípravy repoz
 kws/
 ├── a_data_preparation/          # Príprava a anotácia audio dát
 │   ├── annotate_long_segments.py
-│   ├── download_data.py
 │   ├── extract_long_segments_from_long_records.py
 │   ├── extract_short_negative_segments_from_short_records.py
 │   └── prepare_noises.py
 │                    
 ├── b_dataset/                   # Tvorba a ukladanie finálnych datasetov,
-│   ├── create_dataset.py
-│   └── download_datasets.py
+│   └── create_dataset.py
 │   
 ├── c_model/                     # Definícia modelu
 │   └── m_w2v.py                 # Wav2VecKWS trieda
