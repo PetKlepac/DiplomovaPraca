@@ -26,7 +26,7 @@ from sklearn.metrics import confusion_matrix
 # ────────────────────────────────────────────────────────────────
 # KONFIGURÁCIA
 # ────────────────────────────────────────────────────────────────
-MODEL_NAME = "d5_m_w2v_c"
+MODEL_NAME = "d2_m_w2v_c"
 EPOCH_TO_USE = 10
 
 # === TU ZADÁŠ SVOJE TRI PRAHY ===

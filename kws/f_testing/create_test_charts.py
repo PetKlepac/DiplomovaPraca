@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 # ────────────────────────────────────────────────────────────────
 # KONFIGURÁCIA
 # ────────────────────────────────────────────────────────────────
-MODEL_NAME = "whisper"
+MODEL_NAME = "d2_m_w2v_c"
 EPOCH_TO_USE = 10
 THRESHOLD = 0.50
 
