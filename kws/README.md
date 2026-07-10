@@ -11,37 +11,81 @@ Vedúci práce: **Ing. Matouš Cejnek, Ph.D.**
 Cieľom je automaticky detegovať kľúčové slovo "finále" v audio nahrávkach leteckej komunikácie (LKJH) a tým 
 znížiť pracovnú záťaž operátorov letiska.
 
-## Použitá metóda
+---
+# Použitá metodológia
 - **Model**: Wav2Vec2ForSequenceClassification (Hugging Face) fine-tuned na binary klasifikáciu (positive = kľúčové slovo, negative = ostatné).
 - **Stratégia zamrazovania**: feature extractor + väčšina encoderu zamrazená, posledné 3 vrstvy + classification head sa trénujú.
 - **Augmentácia**: clean verzie + 11 noisy verzií s náhodným SNR (5–15 dB).
-- **Štnadardizácia dát**: všetky audio súbory sú mono, 16 kHz, presne 1 s, –22 dBFS.
+- **Štandardizácia dát**: všetky audio súbory sú mono, 16 kHz, presne 1 s, –22 dBFS.
 - **Testovanie**: inferencia na dlhých nahrávkach pomocou **sliding window** (1 s okná, krok 0.05 s) → max. pravdepodobnosť.
 
-## Štruktúra repozitára
+---
+
+# Príprava repozitára
+
+## 1. Klon repozitára
+```
+git clone https://github.com/PetKlepac/DiplomovaPraca
+
+cd DiplmovaPraca
+```
+
+## 2. Tvorba virtuálneho prostredia (odporúčané)
+```
+py -3.12 -m venv venv
+
+venv\Scripts\activate
+```
+
+## 3. Instalácia závislostí
+```
+python -m pip install --upgrade pip
+
+pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu128
+
+pip install -r requirements.txt
+```
+
+**Upozornenie**
+
+Pre prácu so všetkými funkcionalitami repozitára je nutné meniť kód priamo v súboroch.
+
+Odporúča sa preto práca s IDE, kde niektoré predošlé kroky prípravy repozitára bude možné vykonať priamo v ňom.
+
+---
+
+# Štruktúra repozitára
 
 ```
 kws/
 ├── a_data_preparation/          # Príprava a anotácia audio dát
-│   ├── prepare_noises.py
+│   ├── annotate_long_segments.py
+│   ├── download_data.py
 │   ├── extract_long_segments_from_long_records.py
 │   ├── extract_short_negative_segments_from_short_records.py
-│   └── annotate_long_segments.py          
+│   └── prepare_noises.py
+│                    
 ├── b_dataset/                   # Tvorba a ukladanie finálnych datasetov,
-│   └── create_dataset.py
+│   ├── create_dataset.py
+│   └── download_datasets.py
+│   
 ├── c_model/                     # Definícia modelu
 │   └── m_w2v.py                 # Wav2VecKWS trieda
+│   
 ├── d_config/                    # Konfigurácia experimentu
 │   └── c.py
+│   
 ├── f_training/                  # Tréningový proces
 │   ├── train.py                 # Vstupný bod tréningu
 │   ├── trainer.py
 │   └── dataset.py
+│   
 ├── g_testing/                   # Testovanie a vyhodnotenie modelu
 │   ├── test.py                  # Testovanie (sliding-window inferencia)
 │   ├── evaluate_independent.py  # Nezávislé metriky
 │   ├── evaluate_dependent.py    # Závislé metriky
 │   └── create_test_charts.py    # Priame grafy z výsledkov testovania
+│   
 └── h_result/                    # Výsledky tréningov a testovaní
     └── d3_m_w2v_c/              # (príklad experimentu)
         ├── models/              # .pth checkpointy
@@ -51,66 +95,17 @@ kws/
 
 ---
 
-# 1. Clone the repository
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-cd YOUR_REPO_NAME
+# Obecný postup práce v repozitári
 
-# 2. Create and activate virtual environment
-python -m venv venv
-venv\Scripts\activate
+**Upozornenie**
 
-# 3. Install dependencies
-pip install --upgrade pip
-pip install -r requirements.txt
+Verejne dostupný repozitár **neobsahuje audio dáta**. 
 
-# 4. Download the data
-cd kws\a_data_preparation
-python download_data.py
-
-cd ..\..\kws\b_dataset
-python download_data.py
-
-# 5. Check that data was downloaded
-dir kws\a_data_preparation\prepared_data
-dir kws\b_dataset\d2
-
-## Inštalácia závislostí
-
-V koreňovom adresári repozitára je potrebné vytvoriť súbor requirements.txt s obsahom:
-
-```txt
-torch==2.12.0.dev20260309+cu128
-torchaudio==2.11.0.dev20260407+cu128
-transformers==5.7.0
-pydub==0.25.1
-pygame==2.6.1
-numpy==2.4.4
-pandas==3.0.2
-matplotlib==3.10.9
-scikit-learn==1.9.0
-soundfile==0.13.1
-tqdm==4.67.3
-joblib==1.5.3
-```
-
-Závislosti je možné nainštalovať príkazom:
-
-```bash
-pip install -r requirements.txt
-```
-
-Odporúča sa vytvoriť virtuálne prostredie (napr. python -m venv venv && source venv/bin/activate).
+Tie je možné stiahnuť prostredníctvom python súborov spomenutých nižšie.
 
 ---
 
-## Obecný postup
-
-**Dôležité upozornenie!**  
-Verejne dostupný repozitár **neobsahuje surové audio dáta**.
-
----
-
-### 1. Príprava dát
+## 1. Príprava dát
 
 Vstupné audio dáta sa delia na dve základné kategórie:
 
@@ -121,13 +116,13 @@ Podľa typu dostupných nahrávok sa volí postup získavania vzoriek.
 
 Nasledujúci opis uvádza odporúčaný postup.
 
-#### Príprava šumových súborov
+### a) Príprava šumových súborov
 
 Skript `prepare_noises.py` normalizuje a štandardizuje súbory so šumom (premenovanie, orezanie na maximálnu dĺžku).  
 
 Výstupné súbory slúžia neskôr ako zdroj šumu pri augmentácii tréningových dát.
 
-#### Získanie viet z dlhých nahrávok (long records)
+### b) Získanie viet z dlhých nahrávok (long records)
 
 Ak sú k dispozícii dlhé nahrávky s pauzami, použije sa skript `extract_long_segments_from_long_records.py`.
 
@@ -135,7 +130,7 @@ Na základe detekcie ticha rozdelí nahrávku na samostatné rečové segmenty (
 
 Výstupom sú súbory použiteľné pre testovanie (inferenciu).
 
-#### Anotácia získaných segmentov
+### c) Anotácia získaných segmentov
 
 Segmenty vytvorené v predchádzajúcom kroku sa anotujú pomocou skriptu `annotate_long_segments.py`.  
 
@@ -143,7 +138,7 @@ Používateľ interaktívne priraďuje jednotlivým segmentom kategórie (positi
 
 Anotované súbory sa automaticky triedia do príslušných podpriečinkov.
 
-#### Získanie negatívnych vzoriek z krátkych nahrávok
+### d) Získanie negatívnych vzoriek z krátkych nahrávok
 
 Pre nahrávky bez pauz sa používa skript `extract_short_negative_segments_from_short_records.py`.  
 
@@ -151,12 +146,23 @@ Generuje rovnomerne rozložené krátke segmenty a zároveň umožňuje ich inte
 
 Tento prístup sa používa najmä preto, že krátke nahrávky môžu obsahovať aj pozitívne vzorky, a preto je potrebné ich overiť hneď pri extrakcii.
 
-### 2. Vytvorenie datasetu
+### Priame získanie audio dát
+
+Získanie všetkých surových a predpripravených audio dát práce umožňuje skript `download_data.py`
+
+---
+
+## 2. Vytvorenie datasetu
 
 Po získaní a anotovaní pozitívnych aj negatívnych vzoriek sa spustí skript `b_dataset/create_dataset.py`.  
+
 Skript zhromažďuje anotované súbory podľa definovanej konfigurácie priečinkov a vytvára štruktúrovaný dataset rozdelený na tréningovú a validačnú časť.
 
-### 3. Model
+Získanie všetkých surových a predpripravených audio dát práce umožňuje skript `download_datasets.py`
+
+---
+
+## 3. Model
 
 Priečinok `c_model` obsahuje definíciu modelu.
 
@@ -164,7 +170,9 @@ Súbor `m_w2v.py` definuje triedu `Wav2VecKWS`, ktorá obaľuje predtrénovaný 
 
 Model podporuje selektívne zamrazovanie vrstiev feature extractora a enkodéra a umožňuje odomknutie posledných vrstiev enkodéra.
 
-### 4. Konfigurácia
+---
+
+## 4. Konfigurácia
 
 Priečinok `d_config` obsahuje konfiguračné súbory jednotlivých experimentov. 
 
@@ -174,7 +182,9 @@ Obsahuje všetky hyperparametre potrebné pre tréning, ako sú počet epoch, le
 
 Určuje tiež cesty k tréningovým dátam a k výstupným priečinkom výsledkov.
 
-### 5. Tréning
+---
+
+## 5. Tréning
 
 Priečinok `e_training` obsahuje všetko potrebné na tréning modelu. 
 
@@ -184,7 +194,9 @@ Súbor `train.py` predstavuje hlavný tréningový skript, ktorý načíta konfi
 
 Súbor `trainer.py` implementuje samotnú tréningovú slučku vrátane validácie, použitia ReduceLROnPlateau scheduleru, ukladania modelov po každej epoche a generovania grafov a CSV súborov s metrikami.
 
-### 6. Testovanie a vyhodnocovanie
+---
+
+## 6. Testovanie a vyhodnocovanie
 
 Priečinok `f_testing` obsahuje skripty na testovanie a vyhodnocovanie natrénovaného modelu. 
 
@@ -198,7 +210,9 @@ Súbor `analyze_model.py` analyzuje natrénovaný model z hľadiska počtu param
 
 Súbor `create_test_charts.py` generuje prehľadné stĺpcové grafy z výsledkov testovania uložených v CSV tabuľke.
 
-### 7. Výsledky
+---
+
+## 7. Výsledky
 
 Priečinok `g_result` je hlavný výstupný priečinok projektu. Má štruktúru `<DATASET>_<MODEL>_<CONFIG>`, napríklad `d2_m_w2v_c`. 
 
@@ -212,10 +226,10 @@ Táto štruktúra umožňuje prehľadné ukladanie a porovnávanie viacerých ex
 
 ---
 
-**Zhrnutie pipeline**
+# Zhrnutie pipeline
 
-1. Na prípravu dát slúžia skripty `prepare_noises.py`, `extract_long_segments_from_long_records.py`, `annotate_long_segments.py` a `extract_short_negative_segments_from_short_records.py`.
-2. Po ich použití sa spustí `b_dataset/create_dataset.py`.
+1. Na prípravu dát slúžia skripty `prepare_noises.py`, `extract_long_segments_from_long_records.py`, `annotate_long_segments.py` a `extract_short_negative_segments_from_short_records.py`. Pre použitie audio dát práce postačí skript `download_data.py`.
+2. Po ich použití sa spustí `b_dataset/create_dataset.py`. Pre použitie datasetov práce postačí použiť skript `download_datasets.py`.
 3. Pred spustením tréningu sa upraví konfiguračný súbor `d_config/c.py` a je možné upraviť augmentácie v súbore `e_training/dataset.py`.
 4. Následne sa spustí tréning `e_training/train.py`.
 5. Na testovanie poslúžia skripty v `f_testing` ako `test.py`, `test_whisper.py`, `evaluate_independent.py`, `evaluate_dependent.py`, `analyze_model.py` a `create_test_charts.py`.
