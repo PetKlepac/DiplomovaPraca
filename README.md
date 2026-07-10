@@ -99,9 +99,12 @@ kws/
 
 **Upozornenie**
 
-Verejne dostupný repozitár **neobsahuje audio dáta**. 
+Verejne dostupný repozitár **neobsahuje audio dáta, modely a ich vyhodnotenie**. 
 
-Tie je možné stiahnuť prostredníctvom python súborov spomenutých nižšie.
+Adresáre, ktoré ich obsahujú, sú dostupné online na: 
+https://doi.org/10.5281/zenodo.21301042
+
+Pre plnú reprodukovateľnosť postačí ich obsah vložiť do rovnomenných adresárov v tomto projekte. 
 
 ---
 
@@ -146,10 +149,6 @@ Generuje rovnomerne rozložené krátke segmenty a zároveň umožňuje ich inte
 
 Tento prístup sa používa najmä preto, že krátke nahrávky môžu obsahovať aj pozitívne vzorky, a preto je potrebné ich overiť hneď pri extrakcii.
 
-### Priame získanie audio dát
-
-Získanie všetkých surových a predpripravených audio dát práce umožňuje skript `download_data.py`
-
 ---
 
 ## 2. Vytvorenie datasetu
@@ -157,8 +156,6 @@ Získanie všetkých surových a predpripravených audio dát práce umožňuje 
 Po získaní a anotovaní pozitívnych aj negatívnych vzoriek sa spustí skript `b_dataset/create_dataset.py`.  
 
 Skript zhromažďuje anotované súbory podľa definovanej konfigurácie priečinkov a vytvára štruktúrovaný dataset rozdelený na tréningovú a validačnú časť.
-
-Získanie všetkých surových a predpripravených audio dát práce umožňuje skript `download_datasets.py`
 
 ---
 
@@ -228,8 +225,8 @@ Táto štruktúra umožňuje prehľadné ukladanie a porovnávanie viacerých ex
 
 # Zhrnutie toku práce
 
-1. Na prípravu dát slúžia skripty `prepare_noises.py`, `extract_long_segments_from_long_records.py`, `annotate_long_segments.py` a `extract_short_negative_segments_from_short_records.py`. Pre použitie audio dát práce postačí skript `download_data.py`.
-2. Po ich použití sa spustí `b_dataset/create_dataset.py`. Pre použitie datasetov práce postačí použiť skript `download_datasets.py`.
+1. Na prípravu dát slúžia skripty `prepare_noises.py`, `extract_long_segments_from_long_records.py`, `annotate_long_segments.py` a `extract_short_negative_segments_from_short_records.py`.
+2. Po ich použití sa spustí `b_dataset/create_dataset.py`.
 3. Pred spustením tréningu sa upraví konfiguračný súbor `d_config/c.py` a je možné upraviť augmentácie v súbore `e_training/dataset.py`.
 4. Následne sa spustí tréning `e_training/train.py`.
 5. Na testovanie poslúžia skripty v `f_testing` ako `test.py`, `test_whisper.py`, `evaluate_independent.py`, `evaluate_dependent.py`, `analyze_model.py` a `create_test_charts.py`.
