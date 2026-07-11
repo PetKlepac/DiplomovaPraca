@@ -27,7 +27,7 @@ znížiť pracovnú záťaž operátorov letiska.
 ```
 git clone https://github.com/PetKlepac/DiplomovaPraca
 
-cd DiplmovaPraca
+cd DiplomovaPraca
 ```
 
 ## 2. Tvorba virtuálneho prostredia (odporúčané)
